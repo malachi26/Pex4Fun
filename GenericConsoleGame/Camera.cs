@@ -11,8 +11,16 @@ namespace GenericConsoleGame
     {
         public void ShowCamera()
         {
-            var monstros = new List<Monster>();
+            // variables for testing/writing
+            var monstros = new List<Monster>
+            {
+                new Monster(new Point(1, 1))
+                , new Monster(new Point(2, 9))
+            };
+
             var item = new List<GameItem>();
+
+
             int size = cameraSize/2;
             int topY = player.GetY() - size,
                 bottomY = player.GetY() + size,
@@ -27,9 +35,22 @@ namespace GenericConsoleGame
             {
                 for (int y = topY; y < bottomY; y++)
                 {
+                    var currentLocation = new Point(x, y);
+                    var cursorLocation = new Point(setX, setY);
+                    
                     Console.ForegroundColor = ConsoleColor.DarkGreen;
-                    Console.SetCursorPosition(setY, setX);
+                    Console.SetCursorPosition(cursorLocation.X, cursorLocation.Y);
                     Console.Write(map[x, y]);
+
+                    var monstersAtThisLocation = monstros.Where(x => x.Location == currentLocation);
+                    if (monstersAtThisLocation.Any())
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.SetCursorPosition(cursorLocation.X, cursorLocation.Y);
+                        Console.Write(monstersAtThisLocation);
+                    }
+
+                    DrawSprite(monstros, currentLocation, cursorLocation);
 
                     DrawSprite(monstros, x, y, setX, setY);
                     DrawSprite(item, x, y, setX, setY);
@@ -39,6 +60,25 @@ namespace GenericConsoleGame
                 Console.Write("\n");
                 setY = 0;
                 setX++;
+            }
+        }
+
+        public void DrawSprite(List<Monster> gamePieces, Point currentLocation, Point cursorLocation)
+        {
+            if (gamePieces.Any())
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+
+
+
+                foreach (var piece in gamePieces)
+                {
+                    if (piece.Location == currentLocation)
+                    {
+                        Console.SetCursorPosition(cursorLocation.X, cursorLocation.Y);
+                        Console.Write(piece);
+                    }
+                }
             }
         }
 
@@ -78,50 +118,84 @@ namespace GenericConsoleGame
     {
         public int X { get; set; }
         public int Y { get; set; }
+
+        public Point(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
     }
 
-    public interface IGamePiece
-    {
-        Point Location { get; }
-        void NewLocation(int x, int y);
-
-    }
-
-    public class GameItem : IGamePiece
+    //public interface IGamePiece
+    //{
+    //    Point Location { get; }
+    //    void ChangeLocation(int x, int y);
+    //}
+    public class GamePiece
     {
         public Point Location { get; }
 
-        public GameItem(Point startLocation)
+        public GamePiece(Point startLocation)
         {
             Location = startLocation;
         }
-
-        public void NewLocation(int x, int y)
-        {
-            Location.X = x;
-            Location.Y = y;
-        } 
-    }
-
-    public class PlayablePiece : IGamePiece
-    {
-        public Point Location { get; }
-
-        public PlayablePiece(Point startLocation)
-        {
-            Location = startLocation;
-        }
-        public void NewLocation(int x, int y)
+        public void ChangeLocation(int x, int y)
         {
             Location.X = x;
             Location.Y = y;
         }
+
+
     }
 
-    public class Monster : PlayablePiece
+    //public class GameItem : GamePiece
+    //{
+    //    public Point Location { get; }
+
+    //    public GameItem(Point startLocation)
+    //    {
+    //        Location = startLocation;
+    //    }
+
+    //    public void ChangeLocation(int x, int y)
+    //    {
+    //        Location.X = x;
+    //        Location.Y = y;
+    //    } 
+    //}
+
+    public class GameItem : GamePiece
     {
-        
+        public GameItem(Point startLocation) : base(startLocation)
+        {
+
+        }
     }
+
+
+    //public class PlayablePiece : GamePiece
+    //{
+    //    public Point Location { get; }
+
+    //    public PlayablePiece(Point startLocation)
+    //    {
+    //        Location = startLocation;
+    //    }
+    //    public void ChangeLocation(int x, int y)
+    //    {
+    //        Location.X = x;
+    //        Location.Y = y;
+    //    }
+    //}
+
+    public class Monster : GamePiece
+    {
+        public Monster(Point startLocation) : base(startLocation)
+        {
+            
+        }
+    }
+
 
     abstract class Monstro
     {
